@@ -1,5 +1,6 @@
 import random
 import pygame
+import numpy as np
 
 """
 10 x 20 grid
@@ -143,6 +144,46 @@ shapes = [S, Z, I, O, J, L, T]
 shape_colors = [(0, 255, 0), (255, 0, 0), (0, 255, 255), (255, 255, 0), (255, 165, 0), (0, 0, 255), (128, 0, 128)]
 
 
+
+
+######################CODE FOR AI PROJECT##############################
+
+
+def get_screenshot_array(screen):
+    """Zwraca RGB numpy array (wysokość x szerokość x 3)."""
+    return pygame.surfarray.array3d(screen).transpose(1, 0, 2)
+
+
+def save_screenshot(screen, filename='screenshot.png'):
+    pygame.image.save(screen, filename)
+
+
+def get_game_state(grid, current_piece, score):
+    """
+    Zwraca słownik reprezentujący aktualny stan gry.
+    """
+    state = {
+        'grid': [row[:] for row in grid],  # głęboka kopia siatki
+        'current_piece': {
+            'shape': current_piece.shape,
+            'color': current_piece.color,
+            'x': current_piece.x,
+            'y': current_piece.y
+        },
+        'score': score
+    }
+    return state
+
+import json
+
+def save_game_state(grid, current_piece, score, filename="state.json"):
+    state = get_game_state(grid, current_piece, score)
+    with open(filename, "w") as f:
+        json.dump(state, f)
+
+####################################################################
+
+
 # class to represent each of the pieces
 
 
@@ -227,7 +268,9 @@ def get_shape():
 
 # draws text in the middle
 def draw_text_middle(text, size, color, surface):
-    font = pygame.font.Font(fontpath, size, bold=False, italic=True)
+    font = pygame.font.Font(fontpath, size)
+    font.set_bold(False)
+    font.set_italic(True)
     label = font.render(text, 1, color)
 
     surface.blit(label, (top_left_x + play_width/2 - (label.get_width()/2), top_left_y + play_height/2 - (label.get_height()/2)))
@@ -306,7 +349,8 @@ def draw_window(surface, grid, score=0, last_score=0):
     surface.fill((0, 0, 0))  # fill the surface with black
 
     pygame.font.init()  # initialise font
-    font = pygame.font.Font(fontpath_mario, 65, bold=True)
+    font = pygame.font.Font(fontpath_mario, 65)
+    font.set_bold(True)
     label = font.render('TETRIS', 1, (255, 255, 255))  # initialise 'Tetris' text with white
 
     surface.blit(label, ((top_left_x + play_width / 2) - (label.get_width() / 2), 30))  # put surface on the center of the window
@@ -436,7 +480,6 @@ def main(window):
                     current_piece.rotation = current_piece.rotation + 1 % len(current_piece.shape)
                     if not valid_space(current_piece, grid):
                         current_piece.rotation = current_piece.rotation - 1 % len(current_piece.shape)
-
         piece_pos = convert_shape_format(current_piece)
 
         # draw the piece on the grid by giving color in the piece locations
