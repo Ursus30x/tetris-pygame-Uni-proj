@@ -26,6 +26,7 @@ class TetrisImageEnv:
         
         # Inicjalizuj pygame i screen przed reset()
         pygame.init()
+        pygame.font.init()
         if render_mode == 'human':
             self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
             pygame.display.set_caption('Tetris RL')
@@ -38,6 +39,10 @@ class TetrisImageEnv:
         
         # Teraz można bezpiecznie wywołać reset()
         self.reset()
+
+    def __del__(self):
+        print(">>> DEL: Destroying TetrisEnv, quitting Pygame")
+        #pygame.quit()
         
     def reset(self):
         """Reset środowiska do stanu początkowego"""
@@ -235,7 +240,7 @@ class TetrisImageEnv:
     
     def close(self):
         """Zamknij środowisko"""
-        pygame.quit()
+        #pygame.quit()
 
 
 class StackedFramesDQN(nn.Module):
@@ -421,7 +426,7 @@ class ImprovedTetrisAgent:
         states, actions, rewards, next_states, dones = zip(*batch)
         
         # Konwertuj do tensorów
-        states = torch.FloatTensor(states).to(self.device)
+        states = torch.FloatTensor(np.array(states)).to(self.device)
         actions = torch.LongTensor(actions).to(self.device)
         rewards = torch.FloatTensor(rewards).to(self.device)
         next_states = torch.FloatTensor(next_states).to(self.device)
@@ -943,21 +948,3 @@ def create_training_config():
     
     print("Configuration saved to tetris_config.json")
     return config
-
-
-# Uruchom jeśli to główny plik
-if __name__ == "__main__":
-    try:
-        # Sprawdź czy tetris.py istnieje
-        import tetris
-        main()
-    except ImportError:
-        print("Error: tetris.py module not found!")
-        print("Make sure you have the tetris.py file with basic Tetris game logic.")
-        print("You can create it or download from a Tetris implementation.")
-    except KeyboardInterrupt:
-        print("\nTraining interrupted by user.")
-    except Exception as e:
-        print(f"Error: {e}")
-        import traceback
-        traceback.print_exc()
