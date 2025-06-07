@@ -90,6 +90,9 @@ class TetrisImageEnv:
         reward = 0
         old_score = self.score
         self.game_time += 1
+        action = int(action) % 6
+        #print(f"action chosen: {action}")
+
         
         # Wykonaj akcję
         if action == 0:  # Left
@@ -427,11 +430,11 @@ class ImprovedTetrisAgent:
         
         # Konwertuj do tensorów
         states = torch.FloatTensor(np.array(states)).to(self.device)
-        actions = torch.LongTensor(actions).to(self.device)
-        rewards = torch.FloatTensor(rewards).to(self.device)
-        next_states = torch.FloatTensor(next_states).to(self.device)
-        dones = torch.BoolTensor(dones).to(self.device)
-        weights = torch.FloatTensor(weights).to(self.device)
+        actions = torch.LongTensor(np.array(actions)).to(self.device)
+        rewards = torch.FloatTensor(np.array(rewards)).to(self.device)
+        next_states = torch.FloatTensor(np.array(next_states)).to(self.device)
+        dones = torch.BoolTensor(np.array(dones)).to(self.device)
+        weights = torch.FloatTensor(np.array(weights)).to(self.device)
         
         # Double DQN
         current_q_values = self.q_net(states).gather(1, actions.unsqueeze(1))
@@ -924,7 +927,7 @@ def create_training_config():
             'render_every': 500,
             'save_every': 1000,
             'batch_size': 32,
-            'learning_rate': 0.0001,
+            'learning_rate': 0.5,
             'epsilon_decay': 0.9995,
             'gamma': 0.99
         },
